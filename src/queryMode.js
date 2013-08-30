@@ -5,7 +5,7 @@ CodeMirror.initQueryMode = function (config) {
 								'[': ']',
 								'{': '}'
 							},
-			  apostrophe = ['"', "'"],
+			  apostrophes = ['"', "'"],
 			  keys = [],
 			  closingBrackets = [];
 
@@ -33,7 +33,7 @@ CodeMirror.initQueryMode = function (config) {
 				function getApostrophe(ch) {
 					if (ch === null)
 						return null;
-					if (apostrophe.indexOf(ch) >= 0)
+					if (apostrophes.indexOf(ch) >= 0)
 						return ch;
 					return null;
 				}
