@@ -97,7 +97,7 @@ CodeMirror.initQueryMode = function (config) {
 					
 					// If there is no wrapper to the current value.
 					if (bracketChar === null && apostropheChar === null) { 
-						stream.eatWhile(/[^\s\u00a0;,]/); // Eat while not a space or a saperator.
+						stream.eatWhile(/[^\s\u00a0;,]/); // Eat while not a space or a separator.
 					}
 					else {
 						var stack = [{ch: apostropheChar || bracketChar, pos: start}];
@@ -108,11 +108,14 @@ CodeMirror.initQueryMode = function (config) {
 							// If expectedChar is apostrophe.
 							if (getApostrophe(expectedChar) !== null) {
 								// TODO: allow the user to do escaping of Apostrophe using backslash.
-								
-								while ((ch = stream.next()) != null && ch !== expectedChar);
-								saveMatch(peek(stack).pos, stream.pos - 1);
-								
-								stack.pop();
+                                while ((ch = stream.next()) != null && ch !== expectedChar); 
+                                if (ch != null) {
+                                    saveMatch(peek(stack).pos, stream.pos - 1);
+                                    stack.pop();
+                                } else {
+                                    saveNoMatch(peek(stack).pos);
+                                    throw 'broken-value';
+                                }
 							}
 							else {
 								while ((ch = stream.next()) != null && ch !== expectedChar && !getBrackets(ch) && !getApostrophe(ch)) {
