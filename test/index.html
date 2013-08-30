@@ -1,0 +1,132 @@
+<!doctype html>
+
+<title>CodeMirror: Properties files mode</title>
+<meta charset="utf-8"/>
+<link rel=stylesheet href="http://codemirror.net/doc/docs.css">
+<link rel=stylesheet href="http://codemirror.net/addon/hint/show-hint.css">
+
+<link rel="stylesheet" href="http://codemirror.net/lib/codemirror.css">
+<script src="http://codemirror.net/lib/codemirror.js"></script>
+<script src="http://codemirror.net/addon/edit/closebrackets.js"></script>
+<script src="http://codemirror.net/addon/hint/show-hint.js"></script>
+<script src="http://codemirror.net/addon/display/placeholder.js"></script>
+<script src="../src/queryMode.js"></script>
+<script src="../src/queryMatchBrackets.js"></script>
+<script src="../src/queryAutoSpace.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<style>.CodeMirror {border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;}</style>
+<div id=nav>
+  <a href="http://codemirror.net"><img id=logo src="http://codemirror.net/doc/logo.png"></a>
+
+  <ul>
+    <li><a href="http://codemirror.net/index.html">Home</a>
+    <li><a href="http://codemirror.net/doc/manual.html">Manual</a>
+    <li><a href="https://github.com/marijnh/codemirror">Code</a>
+  </ul>
+  <ul>
+    <li><a href="../index.html">Language modes</a>
+    <li><a class=active href="#">Properties files</a>
+  </ul>
+</div>
+
+<article>
+<h2>Properties files mode - </h2><pre id="errorMsg"> </pre><button id="toJsonBtn">Translate To Json</button>
+<form><textarea id="code" name="code">
+ip=["129.*", "128.*"]    mxac = "asd",    name != 'qwer'
+mac contains ('qwer', 'as*df');    name2 = qwer
+ip2 = 129.* ip2 = 128.*;
+name3 banana
+name3 = ['this is a broken value'
+</textarea></form>
+	<style>
+		.CodeMirror-cursor {
+			-webkit-transition: left 0.07s ease-out, top 0.07s ease-out;
+			-moz-transition: left 0.07s ease-out, top 0.07s ease-out;
+			transition: left 0.07s ease-out, top 0.07s ease-out;
+		}
+		.CodeMirror-hint {
+			-webkit-transition: background-color 0.07s ease-out, color 0.07s ease-out;
+		}
+
+		.CodeMirror-hint-key {
+			font-weight: bold;
+			font-size: 14px;
+		}
+		
+		.CodeMirror .CodeMirror-placeholder {
+			color: #888;
+		}
+	</style>
+	
+    <script>
+		CodeMirror.initQueryMode({
+			ip: {
+				operators: ['=', '!=', '>='],
+				description: 'ipqweradfqwerasdf'
+			},
+			mac: {
+				operators: ['=', '!=', 'contains'],
+				description: 'macqweradfqwerasdf'
+			},
+			name: {
+				operators: ['=', '!=', 'contains'],
+				description: 'nameqweradfqwerasdf'
+			},
+			name2: {
+				operators: ['=', '!=', 'contains'],
+				description: 'name2qweradfqwerasdf'
+			},
+			name3: {
+				operators: ['=', '!=', 'contains'],
+				description: 'name3qweradfqwerasdf'
+			},
+			ip2: {
+				operators: ['=', '!=', 'contains'],
+				description: 'ip2qweradfqwerasdf'
+			},
+		});
+		
+		CodeMirror.commands.autocomplete = function(cm) {
+			CodeMirror.showHint(cm, CodeMirror.hint.query, {completeSingle: false});
+		}
+	
+		var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+			queryMatchBrackets: true,
+			autoCloseBrackets: true,
+			queryAutoSpace: true,
+			extraKeys: {"Ctrl-Space": "autocomplete"},
+			mode: 'query',
+			height: '100px',
+			placeholder: 'Insert query here...',
+		});
+		
+		var errorDescriptions = {
+			'missing-operator': 'Missing Operator',
+			'duplicate-key': 'Duplicate Key',
+			'unrecognized-key': 'Unrecognized Key',
+			'broken-value': 'The value is broken',
+		};
+		
+		$(function () {
+			var $errorMsg = $('#errorMsg');
+			$('.CodeMirror').on('mouseenter', '.cm-error', function () {
+				var $this = $(this);
+				for (var errorType in errorDescriptions) {
+					if ($this.hasClass('cm-' + errorType)) {
+						$errorMsg.text('error: ' + errorDescriptions[errorType]);
+					}
+				}
+			}).on('mouseleave', '.cm-error', function () {
+				$errorMsg.text(' ');
+			});
+			
+			$('#toJsonBtn').click(function () {
+				alert(JSON.stringify(editor.getQuery()));
+			});
+		});
+    </script>
+	
+	<!--<ul class="CodeMirror-hints"><li class="CodeMirror-hint CodeMirror-hint-active"><div class="CodeMirror-hint-key">ip</div><div class="CodeMirror-hint-description">ipqweradfqwerasdf</div></li><li class="CodeMirror-hint"><div class="CodeMirror-hint-key">mac</div><div class="CodeMirror-hint-description">macqweradfqwerasdf</div></li><li class="CodeMirror-hint"><div class="CodeMirror-hint-key">name</div><div class="CodeMirror-hint-description">nameqweradfqwerasdf</div></li><li class="CodeMirror-hint"><div class="CodeMirror-hint-key">name2</div><div class="CodeMirror-hint-description">name2qweradfqwerasdf</div></li><li class="CodeMirror-hint"><div class="CodeMirror-hint-key">name3</div><div class="CodeMirror-hint-description">name3qweradfqwerasdf</div></li><li class="CodeMirror-hint"><div class="CodeMirror-hint-key">ip2</div><div class="CodeMirror-hint-description">ip2qweradfqwerasdf</div></li></ul>-->
+	
+  </article>
