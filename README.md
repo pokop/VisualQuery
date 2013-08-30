@@ -1,4 +1,4 @@
 VisualQuery
 ===========
 
-An extension for CodeMirror for VisualQuery language. 
+An extension of CodeMirror for VisualQuery language. 
