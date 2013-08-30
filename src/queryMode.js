@@ -6,6 +6,7 @@ CodeMirror.initQueryMode = function (config) {
 								'{': '}'
 							},
 			  apostrophes = ['"', "'"],
+              escapeCharacter = '\\',
 			  keys = [],
 			  closingBrackets = [];
 
@@ -107,8 +108,7 @@ CodeMirror.initQueryMode = function (config) {
 								  
 							// If expectedChar is apostrophe.
 							if (getApostrophe(expectedChar) !== null) {
-								// TODO: allow the user to do escaping of Apostrophe using backslash.
-                                while ((ch = stream.next()) != null && ch !== expectedChar); 
+                                while ((ch = stream.next()) != null && (ch !== expectedChar || stream.string.charAt(stream.pos - 2) == escapeCharacter)); 
                                 if (ch != null) {
                                     saveMatch(peek(stack).pos, stream.pos - 1);
                                     stack.pop();
@@ -116,8 +116,7 @@ CodeMirror.initQueryMode = function (config) {
                                     saveNoMatch(peek(stack).pos);
                                     throw 'broken-value';
                                 }
-							}
-							else {
+							} else {
 								while ((ch = stream.next()) != null && ch !== expectedChar && !getBrackets(ch) && !getApostrophe(ch)) {
 									// If this is an unnecessary closing bracket, save it as noMatches.
 									if (closingBrackets.indexOf(ch) >= 0)
@@ -128,8 +127,7 @@ CodeMirror.initQueryMode = function (config) {
 									saveMatch(peek(stack).pos, stream.pos - 1);
 									stack.pop();
 								}
-								else if (getApostrophe(ch)) {
-									// TODO: allow the user to do escaping of Apostrophe using backslash.
+								else if (getApostrophe(ch) && stream.string.charAt(stream.pos - 2) != escapeCharacter) {
 									stack.push({ch: getApostrophe(ch), pos: stream.pos - 1});
 								}
 								else if (getBrackets(ch))
