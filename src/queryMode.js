@@ -6,7 +6,7 @@ CodeMirror.initQueryMode = function (config) {
 								'{': '}'
 							},
 			  apostrophes = ['"', "'"],
-              escapeCharacter = '\\',
+			  escapeCharacter = '\\',
 			  keys = [],
 			  closingBrackets = [];
 
@@ -108,14 +108,18 @@ CodeMirror.initQueryMode = function (config) {
 								  
 							// If expectedChar is apostrophe.
 							if (getApostrophe(expectedChar) !== null) {
-                                while ((ch = stream.next()) != null && (ch !== expectedChar || stream.string.charAt(stream.pos - 2) == escapeCharacter)); 
-                                if (ch != null) {
-                                    saveMatch(peek(stack).pos, stream.pos - 1);
-                                    stack.pop();
-                                } else {
-                                    saveNoMatch(peek(stack).pos);
-                                    throw 'broken-value';
-                                }
+								while ((ch = stream.next()) != null && ch !== expectedChar) {
+									if (ch === escapeCharacter) {
+										stream.next(); // Escape!
+									}
+								}
+								if (ch === expectedChar) {
+									saveMatch(peek(stack).pos, stream.pos - 1);
+									stack.pop();
+								} else {
+									saveNoMatch(peek(stack).pos);
+									throw 'broken-value';
+								}
 							} else {
 								while ((ch = stream.next()) != null && ch !== expectedChar && !getBrackets(ch) && !getApostrophe(ch)) {
 									// If this is an unnecessary closing bracket, save it as noMatches.
@@ -127,11 +131,12 @@ CodeMirror.initQueryMode = function (config) {
 									saveMatch(peek(stack).pos, stream.pos - 1);
 									stack.pop();
 								}
-								else if (getApostrophe(ch) && stream.string.charAt(stream.pos - 2) != escapeCharacter) {
+								else if (getApostrophe(ch)) {
 									stack.push({ch: getApostrophe(ch), pos: stream.pos - 1});
 								}
-								else if (getBrackets(ch))
+								else if (getBrackets(ch)) {
 									stack.push({ch: getBrackets(ch), pos: stream.pos - 1});
+								}
 								else {
 									// Save this broker as noMatches.
 									saveNoMatch(peek(stack).pos);
@@ -201,7 +206,7 @@ CodeMirror.initQueryMode = function (config) {
 
 			startState: function() {
 				return {
-					position : 'key',       // Current position, 'key', 'operator', 'value'
+					position : 'key',	   // Current position, 'key', 'operator', 'value'
 					lastKey: null,
 					lineNumber: -1,
 					lastKeyStart: 0,
