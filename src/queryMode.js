@@ -74,10 +74,6 @@ CodeMirror.initQueryMode = function (config) {
 					return 'error';
 				}
 				
-				function peek(stack) {
-					return stack[stack.length - 1];
-				}
-				
 				function saveMatch(pos1, pos2) {
 					if (!state.matches[state.lineNumber])
 						state.matches[state.lineNumber] = [];
@@ -91,64 +87,68 @@ CodeMirror.initQueryMode = function (config) {
 				}
 				
 				function getValue() {
+					stream.eatWhile(/[\s\u00a0,]/);
+
 					var start = stream.pos, 
 						  bracketChar = getBrackets(stream.peek()), 
 						  apostropheChar = getApostrophe(stream.next()), 
-						  ch = '';
-					
-					// If there is no wrapper to the current value.
-					if (bracketChar === null && apostropheChar === null) { 
-						stream.eatWhile(/[^\s\u00a0;,]/); // Eat while not a space or a separator.
+						  ch = '',
+						  value = null;
+
+					if (apostropheChar !== null) {
+						while ((ch = stream.next()) != null && ch !== apostropheChar) {
+							if (ch === escapeCharacter) {
+								stream.next(); // Escape!
+							}
+						}
+						if (ch === apostropheChar) {
+							saveMatch(start, stream.pos - 1);
+						} else {
+							saveNoMatch(start);
+							throw 'broken-value';
+						}
+						return eval(stream.string.substr(start, stream.pos - start));
 					}
-					else {
-						var stack = [{ch: apostropheChar || bracketChar, pos: start}];
-						
-						while (stack.length > 0) {
-							var expectedChar = peek(stack).ch;
-								  
-							// If expectedChar is apostrophe.
-							if (getApostrophe(expectedChar) !== null) {
-								while ((ch = stream.next()) != null && ch !== expectedChar) {
-									if (ch === escapeCharacter) {
-										stream.next(); // Escape!
-									}
-								}
-								if (ch === expectedChar) {
-									saveMatch(peek(stack).pos, stream.pos - 1);
-									stack.pop();
-								} else {
-									saveNoMatch(peek(stack).pos);
-									throw 'broken-value';
-								}
-							} else {
-								while ((ch = stream.next()) != null && ch !== expectedChar && !getBrackets(ch) && !getApostrophe(ch)) {
-									// If this is an unnecessary closing bracket, save it as noMatches.
-									if (closingBrackets.indexOf(ch) >= 0)
-										saveNoMatch(stream.pos - 1);
-								}
-								
-								if (ch === expectedChar) {
-									saveMatch(peek(stack).pos, stream.pos - 1);
-									stack.pop();
-								}
-								else if (getApostrophe(ch)) {
-									stack.push({ch: getApostrophe(ch), pos: stream.pos - 1});
-								}
-								else if (getBrackets(ch)) {
-									stack.push({ch: getBrackets(ch), pos: stream.pos - 1});
-								}
-								else {
-									// Save this broker as noMatches.
-									saveNoMatch(peek(stack).pos);
-									throw 'broken-value';
+					else if (bracketChar !== null) {
+						value = [];
+
+						while ((ch = stream.next()) != null && ch !== bracketChar) {
+							// If this is an unnecessary closing bracket, save it as noMatches.
+							if (closingBrackets.indexOf(ch) >= 0) {
+								saveNoMatch(stream.pos - 1);
+							}
+
+							if (getApostrophe(ch) || getBrackets(ch)) {
+								stream.pos -= 1;
+								value.push(getValue());
+								stream.eatWhile(/[\s\u00a0,]/);
+							}
+							else {
+								var str_start = stream.pos - 1;
+								stream.eatWhile(new RegExp("[^,\\" + bracketChar + "]"));
+
+								if (stream.pos - str_start >= 1) {
+									var str = stream.string.substr(str_start, stream.pos - str_start);
+									str = str.trim();
+									value.push(str);
 								}
 							}
 						}
+						if (ch === bracketChar) {
+							saveMatch(start, stream.pos - 1);
+						} else {
+							saveNoMatch(start);
+							throw 'broken-value';
+						}
 					}
-					
-					if (start < stream.pos + 1)
-						return stream.string.substr(start, stream.pos - start);
-					return null;
+					else {
+						stream.eatWhile(/[^\s\u00a0;,]/); // Eat while not a space or a separator.
+						if (stream.pos - start >= 1)
+							value = stream.string.substr(start, stream.pos - start);
+					}
+
+					stream.eatWhile(/[\s\u00a0,]/);
+					return value;
 				}
 				
 				if (stream.sol()) {
@@ -306,18 +306,6 @@ CodeMirror.initQueryMode = function (config) {
 		return {list: [], from: CodeMirror.Pos(cur.line, 0), to: CodeMirror.Pos(cur.line, 0)};
 	});
 
-	function myEval(str) {
-		var ch = str[0];
-		
-		if (ch === '(') { // If surrounded with ( ), replace them to [ ].
-			str = '[' + str.substr(1, str.length - 2) + ']'
-		}
-		else if (ch !== '[' && ch !== '"' && ch !== "'") { // If not surrounded in anything, wrap it with " ".
-			str = '"' + str + '"';
-		}
-		return eval(str);
-	}
-	
 	CodeMirror.prototype.getQuery = function () {
 		var res = {}, state = this.getStateAfter();
 		
@@ -325,7 +313,7 @@ CodeMirror.initQueryMode = function (config) {
 			if (state.dict[key].value)
 				res[key] = {
 					operator: state.dict[key].operator,
-					value: myEval(state.dict[key].value)
+					value: state.dict[key].value
 				};
 		}
 		
