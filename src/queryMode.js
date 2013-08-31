@@ -121,7 +121,6 @@ CodeMirror.initQueryMode = function (config) {
 							if (getApostrophe(ch) || getBrackets(ch)) {
 								stream.pos -= 1;
 								value.push(getValue());
-								stream.eatWhile(/[\s\u00a0,]/);
 							}
 							else {
 								var str_start = stream.pos - 1;
@@ -133,6 +132,7 @@ CodeMirror.initQueryMode = function (config) {
 									value.push(str);
 								}
 							}
+							stream.eatWhile(/[\s\u00a0,]/);
 						}
 						if (ch === bracketChar) {
 							saveMatch(start, stream.pos - 1);
