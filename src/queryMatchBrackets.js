@@ -8,12 +8,15 @@
 	var cur = cm.getCursor(), state = cm.getStateAfter();
 	
 	if (state.matches.length > cur.line) {
-		var matches = state.matches[cur.line], i = matches.length;
-		while (i--) {
-			var pos = matches[i];
-			if (pos[0] === cur.ch || pos[0] === cur.ch - 1 || pos[1] === cur.ch || pos[1] === cur.ch - 1)
-				return {from: Pos(cur.line, pos[0]), to: Pos(cur.line, pos[1]),
-					match: true};
+		var matches = state.matches[cur.line], i;
+		if (matches) {
+			i = matches.length;
+			while (i--) {
+				var pos = matches[i];
+				if (pos[0] === cur.ch || pos[0] === cur.ch - 1 || pos[1] === cur.ch || pos[1] === cur.ch - 1)
+					return {from: Pos(cur.line, pos[0]), to: Pos(cur.line, pos[1]),
+						match: true};
+			}
 		}
 	}
 	if (state.noMatches.length > cur.line) {
