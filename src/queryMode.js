@@ -133,7 +133,7 @@ CodeMirror.initQueryMode = function (config) {
 							}
 							else {
 								var str_start = stream.pos - 1;
-								stream.eatWhile(new RegExp("[^;,\\" + bracketChar + "]"));
+								stream.eatWhile(new RegExp("[^\\s\\u00a0;,\\" + bracketChar + "]"));
 
 								if (stream.pos - str_start >= 1) {
 									var str = stream.string.substr(str_start, stream.pos - str_start);
