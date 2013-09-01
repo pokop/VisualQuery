@@ -36,7 +36,7 @@
 						var state = token.state, 
 							  key = state.lastKey;
 							  
-						literal = key + ' ' + state.dict[key].operator + ' ' + state.dict[key].value + literal;
+						literal = key + ' ' + state.dict[key].operator + ' ' + state.dict[key].originalString + literal;
 						start = CodeMirror.Pos(cur.line, state.lastKeyStart);
 					}
 					

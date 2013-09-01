@@ -17,12 +17,15 @@
 		}
 	}
 	if (state.noMatches.length > cur.line) {
-		var noMatches = state.noMatches[cur.line], i = noMatches.length;
-		while (i--) {
-			var pos = noMatches[i];
-			if (pos === cur.ch || pos === cur.ch - 1)
-				return {from: Pos(cur.line, pos), to: false,
-					match: false};
+		var noMatches = state.noMatches[cur.line], i;
+		if (noMatches) {
+			i = noMatches.length;
+			while (i--) {
+				var pos = noMatches[i];
+				if (pos === cur.ch || pos === cur.ch - 1)
+					return {from: Pos(cur.line, pos), to: false,
+						match: false};
+			}
 		}
 	}
 	return null;

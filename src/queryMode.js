@@ -64,6 +64,15 @@ CodeMirror.initQueryMode = function (config) {
 					return null;
 				}
 				
+				function removeTrailingEdge(regex, string) {
+					var start = -1, end = string.length;
+					while (regex.test(string[++start]));
+					while (regex.test(string[--end]));
+					if (end  >= start)
+						return string.substr(start, end - start + 1);
+					return '';
+				}
+				
 				function handleError(errorType) {
 					// Eat until a saperator.
 					stream.eatWhile(/[^;,]/);
@@ -188,7 +197,8 @@ CodeMirror.initQueryMode = function (config) {
 				}
 				else if (state.position === 'value') {
 					try {
-						var value = getValue();
+						var start = stream.pos,
+							  value = getValue();
 					}
 					catch (err) {
 						return handleError(err);
@@ -198,6 +208,7 @@ CodeMirror.initQueryMode = function (config) {
 						return handleError('missing-value');
 					}
 					state.dict[state.lastKey].value = value;
+					state.dict[state.lastKey].originalString = removeTrailingEdge(/[\s\u00a0;,]/, stream.string.substr(start, stream.pos - start));
 					state.position = 'key';
 					return 'quote';
 				}
