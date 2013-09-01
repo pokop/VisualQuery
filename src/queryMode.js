@@ -87,7 +87,7 @@ CodeMirror.initQueryMode = function (config) {
 				}
 				
 				function getValue() {
-					stream.eatWhile(/[\s\u00a0,]/);
+					stream.eatWhile(/[\s\u00a0;,]/);
 
 					var start = stream.pos, 
 						  bracketChar = getBrackets(stream.peek()), 
@@ -124,7 +124,7 @@ CodeMirror.initQueryMode = function (config) {
 							}
 							else {
 								var str_start = stream.pos - 1;
-								stream.eatWhile(new RegExp("[^,\\" + bracketChar + "]"));
+								stream.eatWhile(new RegExp("[^;,\\" + bracketChar + "]"));
 
 								if (stream.pos - str_start >= 1) {
 									var str = stream.string.substr(str_start, stream.pos - str_start);
@@ -132,7 +132,7 @@ CodeMirror.initQueryMode = function (config) {
 									value.push(str);
 								}
 							}
-							stream.eatWhile(/[\s\u00a0,]/);
+							stream.eatWhile(/[\s\u00a0;,]/);
 						}
 						if (ch === bracketChar) {
 							saveMatch(start, stream.pos - 1);
@@ -147,7 +147,7 @@ CodeMirror.initQueryMode = function (config) {
 							value = stream.string.substr(start, stream.pos - start);
 					}
 
-					stream.eatWhile(/[\s\u00a0,]/);
+					stream.eatWhile(/[\s\u00a0;,]/);
 					return value;
 				}
 				
