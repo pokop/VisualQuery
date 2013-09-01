@@ -15,5 +15,5 @@ VisualQuery Language Syntax(BNF)
 `value` __::=__ `[^.;\\s]+` __|__ `'` `[^']*` `'` __|__ `"` `[^"]*` `"` __|__ `(` `values` `)` __|__ `[` `values` `]` __|__ `{` `values` `}`<br />
 `values` __::=__ `values-list` __|__ ` `<br />
 `values-list` __::=__ `values-list` `separator` `value` __|__ `value`<br />
-`separator` __::=__ `separator` `single-separator` __|__ `separator`<br />
+`separator` __::=__ `separator` `single-separator` __|__ `single-separator`<br />
 `single-separator` __::=__ `,` __|__ `;` __|__ `<space>`<br />
