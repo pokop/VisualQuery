@@ -156,7 +156,6 @@ CodeMirror.initQueryMode = function (config) {
 							value = stream.string.substr(start, stream.pos - start);
 					}
 
-					stream.eatWhile(/[\s\u00a0;,]/);
 					return value;
 				}
 				
